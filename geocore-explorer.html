@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>GeoCore Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0D1117;color:#E6EDF3;font-family:'IBM Plex Sans','Segoe UI',sans-serif}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#0D1117}
+::-webkit-scrollbar-thumb{background:#30363D;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#484F58}
+#app{display:flex;min-height:100vh}
+#sidebar{width:220px;background:#0D1117;border-right:1px solid #21262D;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100}
+#main{margin-left:220px;flex:1;min-height:100vh;background:#0D1117}
+.logo-wrap{padding:20px 18px 16px;border-bottom:1px solid #21262D;display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;background:#F0A500;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#000;font-family:'IBM Plex Mono',monospace;flex-shrink:0}
+.logo-txt{font-size:14px;font-weight:800;color:#E6EDF3;letter-spacing:-.02em;font-family:'IBM Plex Mono',monospace}
+.logo-sub{font-size:10px;color:#8B949E;letter-spacing:.12em;text-transform:uppercase}
+nav{flex:1;padding:12px 10px;overflow-y:auto}
+.nb{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border-radius:6px;border:none;background:transparent;color:#8B949E;cursor:pointer;font-size:13px;font-weight:400;margin-bottom:2px;font-family:inherit;text-align:left;transition:all .12s;border-left:2px solid transparent}
+.nb:hover{background:#161B22;color:#E6EDF3}
+.nb.act{background:#F0A50020;color:#F0A500;font-weight:600;border-left:2px solid #F0A500}
+.su{padding:14px 16px;border-top:1px solid #21262D;display:flex;align-items:center;gap:10px}
+.av{width:30px;height:30px;border-radius:50%;background:#1C4B8C;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.topbar{height:60px;background:#0D1117;border-bottom:1px solid #21262D;display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50}
+.tb-title{font-size:16px;font-weight:700;color:#E6EDF3;letter-spacing:-.02em}
+.tb-sub{font-size:11px;color:#8B949E;margin-top:1px}
+.tb-actions{display:flex;align-items:center;gap:10px}
+.card{background:#161B22;border:1px solid #21262D;border-radius:8px;padding:20px;transition:border-color .15s,background .15s}
+.card.cp:hover{border-color:#F0A50060;background:#1C2330;cursor:pointer}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.04em}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;border:none}
+.bp{background:#F0A500;color:#000}.bp:hover{background:#FFB800}
+.bg{background:transparent;color:#8B949E;border:1px solid #21262D}.bg:hover{color:#E6EDF3;border-color:#30363D}
+.bd{background:#F8514920;color:#F85149;border:1px solid #F8514930}
+.tw{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:10px 14px;text-align:left;color:#8B949E;font-weight:600;letter-spacing:.04em;font-size:11px;text-transform:uppercase;white-space:nowrap;border-bottom:1px solid #21262D}
+td{padding:11px 14px;border-bottom:1px solid #21262D}
+tbody tr:hover{background:#1C2330}
+tbody tr:last-child td{border-bottom:none}
+.tab-btn{padding:12px 18px;background:transparent;border:none;border-bottom:2px solid transparent;color:#8B949E;cursor:pointer;font-size:13px;font-weight:400;font-family:inherit;transition:all .15s}
+.tab-btn:hover{color:#E6EDF3}
+.tab-btn.act{color:#F0A500;font-weight:600;border-bottom-color:#F0A500}
+.pill{padding:6px 14px;border-radius:20px;border:1px solid #21262D;background:transparent;color:#8B949E;font-size:12px;cursor:pointer;font-family:inherit;transition:all .15s}
+.pill.act{border-color:#F0A500;background:#F0A50020;color:#F0A500;font-weight:600}
+.pill:hover{color:#E6EDF3;border-color:#30363D}
+.mb{width:100%;height:4px;background:#21262D;border-radius:2px;overflow:hidden;margin-top:4px}
+.mf{height:100%;border-radius:2px;transition:width .4s ease}
+.pc{padding:28px}
+.kg{display:grid;gap:12px;margin-bottom:24px}
+.st{font-size:13px;font-weight:700;color:#E6EDF3;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.mono{font-family:'IBM Plex Mono',monospace}
+.tw-wrap{background:#161B22;border:1px solid #21262D;border-radius:8px;overflow:hidden}
+.ir{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px}
+.ik{color:#8B949E}
+.iv{color:#E6EDF3;font-family:'IBM Plex Mono',monospace}
+.litho-seg{display:flex;align-items:flex-start;margin-bottom:1px}
+.litho-d{font-size:10px;color:#484F58;font-family:'IBM Plex Mono',monospace;width:36px;padding-right:6px;padding-top:2px;text-align:right;flex-shrink:0}
+.litho-b{flex:1;border-radius:2px;border:1px solid rgba(0,0,0,.3);cursor:pointer;position:relative;overflow:hidden;min-height:18px}
+.au-ov{position:absolute;right:0;top:0;bottom:0;background:rgba(255,215,0,.4)}
+.3col{display:grid;grid-template-columns:160px 1fr 260px;gap:20px}
+.2col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.ai{border-radius:8px;padding:12px 14px;border-left:3px solid;margin-bottom:8px}
+.am{font-size:12px;color:#E6EDF3;margin-bottom:4px;line-height:1.5}
+.at{font-size:10px;color:#484F58}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="sidebar">
+  <div class="logo-wrap">
+    <div class="logo-icon">G</div>
+    <div><div class="logo-txt">GeoCore</div><div class="logo-sub">Explorer</div></div>
+  </div>
+  <nav id="nav-el"></nav>
+  <div class="su">
+    <div class="av">GS</div>
+    <div><div style="font-size:12px;font-weight:600;color:#E6EDF3">Geo. Silva</div><div style="font-size:10px;color:#8B949E">Geólogo Sênior</div></div>
+  </div>
+</div>
+<div id="main"><div id="vc"></div></div>
+</div>
+
+<script>
+const PROJECTS=[
+  {id:"P001",name:"Projeto Serra Dourada",type:"Ouro",status:"Ativo",region:"GO",area:4820,furos:142,amostras:3891,start:"2022-03",progress:78},
+  {id:"P002",name:"Projeto Carajás Norte",type:"Cobre/Ouro",status:"Ativo",region:"PA",area:12400,furos:89,amostras:2104,start:"2023-01",progress:45},
+  {id:"P003",name:"Projeto Quadrilátero",type:"Ferro/Ouro",status:"Planejamento",region:"MG",area:6750,furos:0,amostras:0,start:"2024-06",progress:8},
+  {id:"P004",name:"Projeto Atacama Sul",type:"Lítio",status:"Concluído",region:"BA",area:2300,furos:210,amostras:5670,start:"2021-08",progress:100}
+];
+const DH=[
+  {id:"DH001",name:"SRD-001",x:345120.5,y:8234560.2,z:820.4,az:270,dip:-60,depth:312.5,status:"Completo",samples:124,litho:true,assay:true,qaqc:"Aprovado"},
+  {id:"DH002",name:"SRD-002",x:345240.8,y:8234480.1,z:815.2,az:270,dip:-60,depth:280.0,status:"Completo",samples:112,litho:true,assay:true,qaqc:"Aprovado"},
+  {id:"DH003",name:"SRD-003",x:345360.2,y:8234410.7,z:812.8,az:270,dip:-55,depth:198.5,status:"Em andamento",samples:79,litho:true,assay:false,qaqc:"Pendente"},
+  {id:"DH004",name:"SRD-004",x:345480.9,y:8234320.4,z:808.1,az:265,dip:-60,depth:0,status:"Planejado",samples:0,litho:false,assay:false,qaqc:"—"},
+  {id:"DH005",name:"SRD-005",x:345600.3,y:8234250.9,z:805.6,az:270,dip:-60,depth:344.0,status:"Completo",samples:137,litho:true,assay:true,qaqc:"Revisão"}
+];
+const IV=[
+  {from:0,to:4.5,litho:"Laterita",alt:"Lateritização",min:"—",rec:82,rqd:0,smp:"SRD001-0001",au:null},
+  {from:4.5,to:12,litho:"Saprolito",alt:"Argilização",min:"—",rec:71,rqd:0,smp:"SRD001-0002",au:null},
+  {from:12,to:28.5,litho:"Gnaisse granítico",alt:"Sericitização fraca",min:"Pirita disseminada",rec:94,rqd:62,smp:"SRD001-0003",au:0.12},
+  {from:28.5,to:45,litho:"Gnaisse granítico",alt:"Sericitização mod.",min:"Pirita + Calcopirita",rec:97,rqd:78,smp:"SRD001-0004",au:0.48},
+  {from:45,to:62.5,litho:"Quartzito",alt:"Silicificação",min:"Veios de quartzo-sulfeto",rec:99,rqd:85,smp:"SRD001-0005",au:2.14},
+  {from:62.5,to:89,litho:"Quartzito mineral.",alt:"Silicificação intensa",min:"QZ + Pirita + Au livre",rec:98,rqd:88,smp:"SRD001-0006",au:8.72},
+  {from:89,to:115.5,litho:"Xisto grafitoso",alt:"Cloritização",min:"Pirita + Arsenopirita",rec:88,rqd:55,smp:"SRD001-0007",au:1.34},
+  {from:115.5,to:148,litho:"Gnaisse anfibólico",alt:"Anfibolitização",min:"Calcopirita disseminada",rec:95,rqd:72,smp:"SRD001-0008",au:0.23},
+  {from:148,to:180.5,litho:"Metabásica",alt:"Epidotização",min:"—",rec:93,rqd:68,smp:"SRD001-0009",au:0.08},
+  {from:180.5,to:220,litho:"Gnaisse granítico",alt:"Muscovitização",min:"Pirita fina disseminada",rec:96,rqd:80,smp:"SRD001-0010",au:0.34},
+  {from:220,to:260,litho:"Quartzito",alt:"Silicificação",min:"Pirita + Au",rec:98,rqd:91,smp:"SRD001-0011",au:4.18},
+  {from:260,to:312.5,litho:"Gnaisse granítico",alt:"Sericitização fraca",min:"Pirita rara",rec:95,rqd:76,smp:"SRD001-0012",au:0.19}
+];
+const SMPS=[
+  {id:"SRD001-0001",hole:"SRD-001",from:0,to:4.5,weight:2.1,status:"Aprovado",lab:"ActLabs",dispatch:"2024-01-15",au:null,flag:null},
+  {id:"SRD001-0005",hole:"SRD-001",from:45,to:62.5,weight:8.4,status:"Aprovado",lab:"ActLabs",dispatch:"2024-01-15",au:2.14,flag:null},
+  {id:"SRD001-0006",hole:"SRD-001",from:62.5,to:89,weight:12.9,status:"Aprovado",lab:"ActLabs",dispatch:"2024-01-15",au:8.72,flag:"High Grade"},
+  {id:"SRD001-0011",hole:"SRD-001",from:220,to:260,weight:19.6,status:"Revisão",lab:"ALS",dispatch:"2024-02-10",au:4.18,flag:"Verificar dup."},
+  {id:"SRD002-0031",hole:"SRD-002",from:120,to:122,weight:0.9,status:"Aprovado",lab:"ActLabs",dispatch:"2024-02-01",au:0.05,flag:null}
+];
+const QAQC=[
+  {type:"Branco",id:"BLK-001",exp:0,res:0.003,pass:true,batch:"LOTE-2024-01"},
+  {type:"Padrão",id:"STD-AU01",exp:5.12,res:5.08,pass:true,batch:"LOTE-2024-01"},
+  {type:"Dup. Campo",id:"DUP-SRD001-006",exp:8.72,res:8.65,pass:true,batch:"LOTE-2024-01"},
+  {type:"Padrão",id:"STD-AU02",exp:1.24,res:1.41,pass:false,batch:"LOTE-2024-02"},
+  {type:"Branco",id:"BLK-002",exp:0,res:0.001,pass:true,batch:"LOTE-2024-02"},
+  {type:"Dup. Pulpa",id:"PUL-SRD002-031",exp:0.05,res:0.048,pass:true,batch:"LOTE-2024-02"}
+];
+const AUDIT=[
+  {ts:"2024-03-15 14:23",user:"geo.silva",action:"EDIT",table:"LITHOLOGY",record:"SRD-003 / 45-62.5m",detail:"Litologia: 'Quartzito' → 'Quartzito mineralizado'",reason:"Revisão após releitura"},
+  {ts:"2024-03-15 09:11",user:"lab.admin",action:"INSERT",table:"LAB_RESULT",record:"LOTE-2024-02",detail:"28 resultados importados via CSV",reason:"Importação automática"},
+  {ts:"2024-03-14 17:45",user:"geo.santos",action:"APPROVE",table:"SAMPLE_BATCH",record:"LOTE-2024-01",detail:"Lote aprovado após QA/QC — todos critérios atendidos",reason:"Aprovação formal"},
+  {ts:"2024-03-14 11:20",user:"geo.silva",action:"EDIT",table:"COLLAR",record:"SRD-005",detail:"Cota Z corrigida: 804.1 → 805.6",reason:"Erro de digitação — confirmado por GPS"},
+  {ts:"2024-03-13 16:02",user:"tec.campos",action:"INSERT",table:"LITHOLOGY",record:"SRD-003 / 0-28.5m",detail:"12 intervalos de litologia registrados",reason:"Logging de campo"}
+];
+const BATCHES=[
+  {id:"LOTE-2024-01",lab:"ActLabs",sent:"2024-01-15",received:"2024-02-01",samples:91,status:"Aprovado",els:["Au","Cu","Ag","Pb","Zn"]},
+  {id:"LOTE-2024-02",lab:"ALS Brasil",sent:"2024-02-10",received:"2024-02-28",samples:28,status:"Revisão",els:["Au","Cu"]},
+  {id:"LOTE-2024-03",lab:"ActLabs",sent:"2024-03-05",received:null,samples:44,status:"Em andamento",els:["Au","Cu","Ag"]}
+];
+const LC={
+  "Laterita":"#C2722A","Saprolito":"#D4956B","Gnaisse granítico":"#9C8080",
+  "Quartzito":"#D8D0C0","Quartzito mineral.":"#C4B870","Xisto grafitoso":"#4A4A5A",
+  "Gnaisse anfibólico":"#6B8B6B","Metabásica":"#3D6B4A"
+};
+const SS={
+  "Ativo":{c:"#3FB950",b:"#3FB95020"},"Planejamento":{c:"#58A6FF",b:"#58A6FF20"},
+  "Concluído":{c:"#8B949E",b:"#161B22"},"Completo":{c:"#3FB950",b:"#3FB95020"},
+  "Em andamento":{c:"#F0A500",b:"#F0A50020"},"Planejado":{c:"#58A6FF",b:"#58A6FF20"},
+  "Aprovado":{c:"#3FB950",b:"#3FB95020"},"Revisão":{c:"#E3B341",b:"#E3B34120"},
+  "Pendente":{c:"#8B949E",b:"#161B22"}
+};
+
+// State
+let view="dashboard", hole=null, logTab="lithology", dhFilter="Todos";
+
+// Utils
+const sbadge=s=>{const x=SS[s]||{c:"#8B949E",b:"#161B22"};return`<span class="badge" style="color:${x.c};background:${x.b};border:1px solid ${x.c}30">${s}</span>`};
+const bdg=(l,c="#8B949E",b="#161B22")=>`<span class="badge" style="color:${c};background:${b};border:1px solid ${c}30">${l}</span>`;
+const auc=v=>{if(!v)return"#484F58";if(v>=5)return"#FFD700";if(v>=1)return"#F0A500";if(v>=0.3)return"#E3B341";return"#8B949E"};
+const mb=(v,c="#F0A500")=>`<div class="mb"><div class="mf" style="width:${Math.min(100,v)}%;background:${c}"></div></div>`;
+const ico=(d,s=16,c="currentColor")=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="${d}"/></svg>`;
+const ICONS={
+  plus:"M12 5v14M5 12h14",
+  export:"M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12",
+  filter:"M22 3H2l8 9.46V19l4 2v-8.54L22 3z",
+  lab:"M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+};
+const btn=(l,cls,icon)=>`<button class="btn ${cls==="p"?"bp":cls==="d"?"bd":"bg"}">${icon?ico(ICONS[icon]||icon,13)+" ":""}${l}</button>`;
+const kpi=(l,v,c="#E6EDF3",d="")=>`<div class="card" style="padding:16px 18px"><div style="font-size:11px;color:#8B949E;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">${l}</div><div class="mono" style="font-size:26px;font-weight:800;color:${c}">${v}</div>${d?`<div style="font-size:11px;color:#484F58;margin-top:4px">${d}</div>`:""}</div>`;
+const tb=(title,sub,actions="")=>`<div class="topbar"><div><div class="tb-title">${title}</div>${sub?`<div class="tb-sub">${sub}</div>`:""}</div><div class="tb-actions">${actions}</div></div>`;
+
+// Nav
+const NAVS=[
+  {id:"dashboard",d:"M3 3h7v7H3V3zM14 3h7v7h-7V3zM3 14h7v7H3v-7zM14 14h7v7h-7v-7z",l:"Dashboard"},
+  {id:"projects",d:"M3 7l9-4 9 4v10l-9 4-9-4V7z",l:"Projetos"},
+  {id:"drillholes",d:"M12 2v20M8 6l4-4 4 4M8 18l4 4 4-4",l:"Furos"},
+  {id:"logging",d:"M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9",l:"Logging"},
+  {id:"samples",d:"M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v11m0 0H5m4 0h10M5 14a2 2 0 01-2-2v-2m2 4v4a2 2 0 002 2h10a2 2 0 002-2v-4M5 18h14",l:"Amostras"},
+  {id:"lab",d:"M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z",l:"Laboratório"},
+  {id:"qaqc",d:"M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",l:"QA/QC"},
+  {id:"map",d:"M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4zM8 2v16M16 6v16",l:"Mapa"},
+  {id:"audit",d:"M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",l:"Auditoria"},
+  {id:"settings",d:"M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z",l:"Configurações"}
+];
+
+function nav(){
+  document.getElementById("nav-el").innerHTML=NAVS.map(n=>`<button class="nb ${view===n.id?"act":""}" onclick="go('${n.id}')">${ico(n.d,15)} <span>${n.l}</span></button>`).join("");
+}
+
+function go(v,data){
+  view=v;if(data)hole=data;
+  if(v==="logging"&&!hole)hole=DH[0];
+  nav();render();
+}
+
+function render(){
+  const fn={
+    dashboard:rDash,projects:()=>rPlac("Projetos","M3 7l9-4 9 4v10l-9 4-9-4V7z"),
+    drillholes:rDH,logging:rLog,samples:rSamp,lab:rLab,qaqc:rQAQC,
+    map:rMap,audit:rAudit,settings:()=>rPlac("Configurações","M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z")
+  };
+  document.getElementById("vc").innerHTML=(fn[view]||rDash)();
+  if(view==="map")setTimeout(drawMap,50);
+}
+
+// ── DASHBOARD ──
+function rDash(){
+  const alerts=[
+    {lv:"e",msg:"STD-AU02 fora de tolerância — LOTE-2024-02 requer revisão imediata",t:"há 2h"},
+    {lv:"w",msg:"SRD-005: duplicata de pulpa com variância acima de 15%",t:"há 5h"},
+    {lv:"w",msg:"3 furos com gaps de amostragem não justificados",t:"há 8h"},
+    {lv:"i",msg:"LOTE-2024-01 aprovado — 91 amostras liberadas para modelagem",t:"há 1d"},
+    {lv:"i",msg:"SRD-003 atingiu profundidade final: 198.5m",t:"há 2d"}
+  ];
+  const ac={e:"#F85149",w:"#E3B341",i:"#58A6FF"};
+  const ab={e:"#F8514915",w:"#E3B34115",i:"#58A6FF15"};
+  return `
+  ${tb("Dashboard","Visão geral dos projetos ativos · Atualizado 15 min atrás",btn("Exportar Resumo","g","export"))}
+  <div class="pc">
+    <div class="kg" style="grid-template-columns:repeat(6,1fr)">
+      ${kpi("Projetos Ativos","2","#58A6FF","+0")}
+      ${kpi("Furos Totais","441","#F0A500","+12 mês")}
+      ${kpi("Amostras","11.665","#3FB950","+340 mês")}
+      ${kpi("QA/QC Pass Rate","96.4%","#3FB950","+1.2%")}
+      ${kpi("Lotes Pendentes","3","#E3B341","Urgente: 1")}
+      ${kpi("Alertas Ativos","7","#F85149","2 críticos")}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 340px;gap:20px">
+      <div>
+        <div class="st">Projetos <button class="btn bg" style="font-size:11px">+ Novo Projeto</button></div>
+        ${PROJECTS.map(p=>{const pc=p.progress===100?"#3FB950":"#F0A500";return`
+        <div class="card" style="margin-bottom:10px;padding:16px 20px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+                <span style="font-size:14px;font-weight:700;color:#E6EDF3">${p.name}</span>
+                ${sbadge(p.status)} ${bdg(p.type,"#F0A500","#F0A50020")}
+              </div>
+              <div style="display:flex;gap:16px;font-size:12px;color:#8B949E;flex-wrap:wrap">
+                <span>📍 ${p.region}</span><span>⬛ ${p.area.toLocaleString()} ha</span>
+                <span>⬇ ${p.furos} furos</span><span>🧪 ${p.amostras.toLocaleString()} amostras</span>
+                <span>📅 ${p.start}</span>
+              </div>
+            </div>
+            <div style="text-align:right;min-width:72px">
+              <div style="font-size:10px;color:#8B949E;margin-bottom:4px">Progresso</div>
+              <div class="mono" style="font-size:22px;font-weight:800;color:${pc}">${p.progress}%</div>
+            </div>
+          </div>
+          <div style="margin-top:12px">${mb(p.progress,pc)}</div>
+        </div>`}).join("")}
+      </div>
+      <div>
+        <div class="st">Alertas</div>
+        ${alerts.map(a=>`<div class="ai" style="background:${ab[a.lv]};border-left-color:${ac[a.lv]}"><div class="am">${a.msg}</div><div class="at">${a.t}</div></div>`).join("")}
+        <div style="margin-top:20px">
+          <div class="st">Atividade Recente</div>
+          ${AUDIT.slice(0,3).map((l,i)=>`
+          <div style="display:flex;gap:10px;margin-bottom:14px;padding-bottom:14px;${i<2?"border-bottom:1px solid #21262D":""}">
+            <div style="width:28px;height:28px;border-radius:50%;background:#161B22;border:1px solid #21262D;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              ${ico("M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",13,"#8B949E")}
+            </div>
+            <div>
+              <div style="font-size:11px;color:#E6EDF3;line-height:1.5">${l.detail}</div>
+              <div style="font-size:10px;color:#484F58;margin-top:2px">${l.user} · ${l.ts.split(" ")[0]}</div>
+            </div>
+          </div>`).join("")}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── DRILLHOLES ──
+function rDH(){
+  const sts=["Todos","Completo","Em andamento","Planejado"];
+  const fil=dhFilter==="Todos"?DH:DH.filter(d=>d.status===dhFilter);
+  return `
+  ${tb("Furos — Serra Dourada","Projeto P001 · 142 furos cadastrados",btn("+ Novo Furo","p","plus")+btn("Importar CSV","g","export"))}
+  <div class="pc">
+    <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center;flex-wrap:wrap">
+      ${sts.map(s=>`<button class="pill ${dhFilter===s?"act":""}" onclick="setDHF('${s}')">${s}</button>`).join("")}
+      <div style="flex:1"></div>${btn("Filtros","g","filter")}
+    </div>
+    <div class="tw-wrap">
+      <table class="tw">
+        <thead><tr>
+          <th>Furo</th><th>X (E)</th><th>Y (N)</th><th>Z</th>
+          <th>Az.</th><th>Dip</th><th>Prof.(m)</th><th>Status</th>
+          <th>Amostras</th><th>Litho</th><th>Ensaio</th><th>QA/QC</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${fil.map(d=>`<tr>
+            <td><span class="mono" style="color:#F0A500;font-weight:700;cursor:pointer" onclick="openLog('${d.id}')">${d.name}</span></td>
+            <td class="mono" style="color:#8B949E">${d.x.toFixed(1)}</td>
+            <td class="mono" style="color:#8B949E">${d.y.toFixed(1)}</td>
+            <td class="mono" style="color:#8B949E">${d.z.toFixed(1)}</td>
+            <td class="mono">${d.az}°</td>
+            <td class="mono">${d.dip}°</td>
+            <td class="mono" style="font-weight:600;color:${d.depth>0?"#E6EDF3":"#484F58"}">${d.depth>0?d.depth.toFixed(1):"—"}</td>
+            <td>${sbadge(d.status)}</td>
+            <td class="mono">${d.samples||"—"}</td>
+            <td style="color:${d.litho?"#3FB950":"#484F58"}">${d.litho?"✓":"—"}</td>
+            <td style="color:${d.assay?"#3FB950":"#484F58"}">${d.assay?"✓":"—"}</td>
+            <td>${d.qaqc!=="—"?sbadge(d.qaqc):`<span style="color:#484F58">—</span>`}</td>
+            <td><button style="background:transparent;border:none;color:#484F58;cursor:pointer;font-size:16px" onclick="openLog('${d.id}')">›</button></td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:12px;color:#8B949E">
+      <span>Mostrando ${fil.length} de ${DH.length} furos</span>
+      <span>Total perfurado: ${DH.reduce((a,d)=>a+d.depth,0).toFixed(1)} m</span>
+    </div>
+  </div>`;
+}
+function setDHF(f){dhFilter=f;render();}
+function openLog(id){hole=DH.find(d=>d.id===id)||DH[0];logTab="lithology";go("logging");}
+
+// ── LOGGING ──
+function rLog(){
+  const h=hole||DH[0];
+  const td=h.depth||312.5;
+  const maxAu=Math.max(...IV.filter(r=>r.au).map(r=>r.au));
+  const tabs=[{id:"lithology",l:"Litologia"},{id:"alteration",l:"Alteração"},{id:"mineralization",l:"Mineralização"},{id:"assay",l:"Ensaios"},{id:"recovery",l:"Recuperação/RQD"}];
+
+  const profile=IV.map(iv=>{
+    const hp=Math.max(18,((iv.to-iv.from)/td)*400);
+    const col=LC[iv.litho]||"#888";
+    const aw=iv.au?Math.min(40,(iv.au/maxAu)*40):0;
+    return`<div class="litho-seg"><div class="litho-d">${iv.from}</div><div class="litho-b" style="height:${hp}px;background:${col}" title="${iv.from}-${iv.to}m: ${iv.litho}">${aw>0?`<div class="au-ov" style="width:${aw}%"></div>`:""}</div></div>`;
+  }).join("")+`<div class="litho-seg"><div class="litho-d">${td}</div></div>`;
+
+  const leg=Object.entries(LC).map(([n,c])=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><div style="width:11px;height:11px;background:${c};border-radius:2px;flex-shrink:0"></div><span style="font-size:10px;color:#8B949E">${n}</span></div>`).join("");
+
+  const ch=logTab==="lithology"?"Litologia":logTab==="alteration"?"Alteração":logTab==="mineralization"?"Mineralização":logTab==="assay"?"Au (g/t)":"Recup. %";
+
+  const rows=IV.map(iv=>{
+    let c4="";
+    if(logTab==="lithology"){const col=LC[iv.litho]||"#888";c4=`<div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;background:${col};border-radius:2px;flex-shrink:0"></div><span>${iv.litho}</span></div>`;}
+    else if(logTab==="alteration")c4=`<span>${iv.alt}</span>`;
+    else if(logTab==="mineralization")c4=`<span style="color:${iv.min!=="—"?"#E3B341":"#484F58"}">${iv.min}</span>`;
+    else if(logTab==="assay")c4=`<span class="mono" style="color:${auc(iv.au)};font-weight:${iv.au&&iv.au>1?700:400}">${iv.au?iv.au.toFixed(2):"—"}</span>`;
+    else c4=`<div><span class="mono" style="color:${iv.rec>90?"#3FB950":iv.rec>75?"#E3B341":"#F85149"}">${iv.rec}%</span>${mb(iv.rec,iv.rec>90?"#3FB950":iv.rec>75?"#E3B341":"#F85149")}</div>`;
+    const c5=logTab==="recovery"?`<span class="mono" style="color:#8B949E">${iv.rqd>0?iv.rqd:"—"}</span>`:`<span class="mono" style="color:#58A6FF;font-size:11px">${iv.smp||"—"}</span>`;
+    return`<tr><td class="mono" style="color:#8B949E">${iv.from.toFixed(1)}</td><td class="mono" style="color:#8B949E">${iv.to.toFixed(1)}</td><td class="mono" style="font-weight:600">${(iv.to-iv.from).toFixed(1)}</td><td>${c4}</td><td>${c5}</td><td style="color:#484F58;cursor:pointer">›</td></tr>`;
+  }).join("");
+
+  const avgR=Math.round(IV.reduce((a,r)=>a+r.rec,0)/IV.length);
+  const avgA=(IV.filter(r=>r.au).reduce((a,r)=>a+r.au,0)/IV.filter(r=>r.au).length).toFixed(2);
+
+  return`
+  ${tb(`Logging — ${h.name}`,`Az ${h.az}° / Dip ${h.dip}° · ${td}m · Serra Dourada`,btn("Exportar","g","export")+btn("Novo Intervalo","p","plus"))}
+  <div style="border-bottom:1px solid #21262D;background:#0D1117;padding:0 28px;display:flex">
+    ${tabs.map(t=>`<button class="tab-btn ${logTab===t.id?"act":""}" onclick="setLT('${t.id}')">${t.l}</button>`).join("")}
+  </div>
+  <div class="pc">
+    <div style="display:grid;grid-template-columns:160px 1fr 260px;gap:20px">
+      <div>
+        <div style="font-size:11px;color:#8B949E;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Perfil Visual</div>
+        ${profile}
+        <div style="margin-top:16px">${leg}<div style="margin-top:10px;padding-top:8px;border-top:1px solid #21262D"><div style="display:flex;align-items:center;gap:6px"><div style="width:11px;height:11px;background:rgba(255,215,0,.5);border-radius:2px"></div><span style="font-size:10px;color:#8B949E">Au &gt; 1 g/t</span></div></div></div>
+      </div>
+      <div>
+        <div class="tw-wrap">
+          <table class="tw"><thead><tr><th>De(m)</th><th>Para(m)</th><th>Int.</th><th>${ch}</th><th>${logTab==="recovery"?"RQD":"Amostra"}</th><th></th></tr></thead>
+          <tbody>${rows}</tbody></table>
+        </div>
+        <div style="display:flex;gap:18px;margin-top:10px;font-size:11px;color:#8B949E;flex-wrap:wrap">
+          <span>12 intervalos · ${td}m</span><span>Rec. média: ${avgR}%</span><span>Au máx: ${maxAu.toFixed(2)} g/t</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="card">
+          <div style="font-size:11px;color:#8B949E;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Collar</div>
+          ${[["Furo",h.name],["Este (X)",h.x.toFixed(1)],["Norte (Y)",h.y.toFixed(1)],["Cota (Z)",h.z.toFixed(1)],["Azimute",`${h.az}°`],["Mergulho",`${h.dip}°`],["Prof. Final",`${td}m`]].map(([k,v])=>`<div class="ir"><span class="ik">${k}</span><span class="iv">${v}</span></div>`).join("")}
+        </div>
+        <div class="card">
+          <div style="font-size:11px;color:#8B949E;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Resumo Au</div>
+          ${[["Au máx.",`${maxAu.toFixed(2)} g/t`,auc(maxAu)],["Au médio",`${avgA} g/t`,"#E6EDF3"],["Interceptos >1g/t",`${IV.filter(r=>r.au>1).length}`,"#F0A500"],["Interceptos >0.3g/t",`${IV.filter(r=>r.au>0.3).length}`,"#E3B341"]].map(([k,v,c])=>`<div class="ir"><span class="ik">${k}</span><span class="iv" style="color:${c};font-weight:600">${v}</span></div>`).join("")}
+        </div>
+        <div class="card">
+          <div style="font-size:11px;color:#8B949E;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Status</div>
+          ${[["Litologia",h.litho,"Completo","Pendente"],["Amostragem",true,"Completo","Pendente"],["Ensaios",h.assay,"Aprovado","Aguardando"],["QA/QC",h.qaqc==="Aprovado",h.qaqc,"Pendente"]].map(([k,ok,y,n])=>`<div class="ir"><span class="ik">${k}</span><span style="color:${ok?"#3FB950":"#E3B341"}">${ok?y:n}</span></div>`).join("")}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+function setLT(t){logTab=t;render();}
+
+// ── SAMPLES ──
+function rSamp(){
+  return`
+  ${tb("Amostras","Gerenciamento de amostras · Serra Dourada",btn("Nova Amostra","p","plus")+btn("Despachar Lote","g","lab"))}
+  <div class="pc">
+    <div class="kg" style="grid-template-columns:repeat(4,1fr)">
+      ${kpi("Total de Amostras","3.891","#E6EDF3")}${kpi("Aguardando Despacho","124","#E3B341")}
+      ${kpi("Em Laboratório","340","#58A6FF")}${kpi("Resultados Recebidos","3.427","#3FB950")}
+    </div>
+    <div class="tw-wrap">
+      <div style="padding:14px 18px;border-bottom:1px solid #21262D;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;font-weight:700;color:#E6EDF3">Registro de Amostras</span>
+        <div style="display:flex;gap:8px">${btn("Filtrar","g","filter")}${btn("Exportar","g","export")}</div>
+      </div>
+      <table class="tw"><thead><tr>
+        <th>ID Amostra</th><th>Furo</th><th>De(m)</th><th>Para(m)</th><th>Peso(kg)</th>
+        <th>Status</th><th>Laboratório</th><th>Despacho</th><th>Au(g/t)</th><th>Flag</th>
+      </tr></thead><tbody>
+        ${SMPS.map(s=>`<tr>
+          <td><span class="mono" style="color:#F0A500;font-weight:700">${s.id}</span></td>
+          <td class="mono">${s.hole}</td>
+          <td class="mono" style="color:#8B949E">${s.from}</td>
+          <td class="mono" style="color:#8B949E">${s.to}</td>
+          <td class="mono">${s.weight}</td>
+          <td>${sbadge(s.status)}</td>
+          <td style="color:#8B949E">${s.lab}</td>
+          <td class="mono" style="color:#8B949E">${s.dispatch}</td>
+          <td class="mono" style="color:${auc(s.au)};font-weight:${s.au&&s.au>1?700:400}">${s.au?s.au.toFixed(2):"—"}</td>
+          <td>${s.flag?bdg(s.flag,s.flag==="High Grade"?"#FFD700":"#E3B341","#E3B34120"):"—"}</td>
+        </tr>`).join("")}
+      </tbody></table>
+    </div>
+  </div>`;
+}
+
+// ── LAB ──
+function rLab(){
+  return`
+  ${tb("Laboratório","Despachos e resultados analíticos",btn("Novo Despacho","p","plus")+btn("Importar Resultados","g","export"))}
+  <div class="pc">
+    <div class="kg" style="grid-template-columns:repeat(4,1fr)">
+      ${kpi("Lotes Enviados","3","#E6EDF3")}${kpi("Aguardando Resultado","1","#E3B341")}
+      ${kpi("TAT Médio","18 dias","#E6EDF3")}${kpi("Em Trânsito","44","#58A6FF")}
+    </div>
+    ${BATCHES.map(b=>`
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap">
+            <span class="mono" style="font-size:15px;font-weight:700;color:#E6EDF3">${b.id}</span>
+            ${sbadge(b.status)}<span style="font-size:12px;color:#8B949E">→ ${b.lab}</span>
+          </div>
+          <div style="display:flex;gap:18px;font-size:12px;color:#8B949E;margin-bottom:10px;flex-wrap:wrap">
+            <span>📦 ${b.samples} amostras</span>
+            <span>📅 Enviado: ${b.sent}</span>
+            <span>${b.received?"✅ Recebido: "+b.received:"⏳ Aguardando resultado..."}</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${b.els.map(e=>bdg(e,"#F0A500","#F0A50020")).join("")}
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${btn("Ver Resultados","g")}
+          ${b.status==="Revisão"?btn("Revisar QA/QC","d"):""}
+          ${b.status==="Aprovado"?btn("Exportar","g","export"):""}
+        </div>
+      </div>
+    </div>`).join("")}
+  </div>`;
+}
+
+// ── QAQC ──
+function rQAQC(){
+  const total=QAQC.length, pass=QAQC.filter(q=>q.pass).length;
+  const pr=Math.round((pass/total)*100);
+  const batches=[...new Set(QAQC.map(q=>q.batch))];
+  const ac={EDIT:"#E3B341",INSERT:"#3FB950",APPROVE:"#58A6FF",DELETE:"#F85149"};
+  return`
+  ${tb("QA/QC","Controle de Qualidade Analítica · Serra Dourada",btn("Aprovar Lote","p")+btn("Novo Padrão","g","plus"))}
+  <div class="pc">
+    <div class="kg" style="grid-template-columns:repeat(5,1fr)">
+      ${kpi("Pass Rate Geral",`${pr}%`,pr>90?"#3FB950":"#E3B341")}
+      ${kpi("Brancos",`${QAQC.filter(q=>q.type==="Branco"&&q.pass).length}/${QAQC.filter(q=>q.type==="Branco").length}`,"#E6EDF3")}
+      ${kpi("Padrões",`${QAQC.filter(q=>q.type==="Padrão"&&q.pass).length}/${QAQC.filter(q=>q.type==="Padrão").length}`,"#E6EDF3")}
+      ${kpi("Duplicatas",`${QAQC.filter(q=>q.type.includes("Dup")&&q.pass).length}/${QAQC.filter(q=>q.type.includes("Dup")).length}`,"#E6EDF3")}
+      ${kpi("Falhas",`${QAQC.filter(q=>!q.pass).length}`,"#F85149")}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <div class="st">Lotes Analíticos</div>
+        ${batches.map(b=>{
+          const items=QAQC.filter(q=>q.batch===b);
+          const ps=items.filter(q=>q.pass).length;
+          const r=Math.round((ps/items.length)*100);
+          return`<div class="card" style="margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <span class="mono" style="font-size:14px;font-weight:700;color:#E6EDF3">${b}</span>
+              ${sbadge(r===100?"Aprovado":"Revisão")}
+            </div>
+            <div style="display:flex;gap:18px;font-size:12px;color:#8B949E;margin-bottom:10px">
+              <span>${items.length} controles</span>
+              <span style="color:${r===100?"#3FB950":"#E3B341"}">${r}% pass</span>
+              <span>${ps} ok · ${items.length-ps} falha</span>
+            </div>
+            ${mb(r,r===100?"#3FB950":"#E3B341")}
+          </div>`;
+        }).join("")}
+      </div>
+      <div>
+        <div class="st">Detalhe dos Controles</div>
+        <div class="tw-wrap">
+          <table class="tw"><thead><tr>
+            <th>Tipo</th><th>ID</th><th>Esperado</th><th>Resultado</th><th>Variação</th><th>Status</th>
+          </tr></thead><tbody>
+            ${QAQC.map(q=>{
+              const vari=q.exp>0?(((q.res-q.exp)/q.exp)*100).toFixed(1):"—";
+              return`<tr style="${!q.pass?"background:#F8514910":""}">
+                <td style="color:#8B949E;font-size:11px">${q.type}</td>
+                <td class="mono" style="color:#F0A500;font-size:11px">${q.id}</td>
+                <td class="mono">${q.exp}</td>
+                <td class="mono" style="color:${!q.pass?"#F85149":"#E6EDF3"};font-weight:${!q.pass?700:400}">${q.res}</td>
+                <td class="mono" style="color:${!q.pass?"#F85149":"#8B949E"}">${vari!=="—"?vari+"%":"—"}</td>
+                <td style="color:${q.pass?"#3FB950":"#F85149"}">${q.pass?"✓":"✗ Falha"}</td>
+              </tr>`;
+            }).join("")}
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── MAP ──
+function rMap(){
+  return`
+  ${tb("Mapa","Visualização espacial · Serra Dourada · SIRGAS 2000 / UTM 22S",btn("Exportar SHP","g","export"))}
+  <div class="pc">
+    <div style="display:grid;grid-template-columns:1fr 220px;gap:20px">
+      <div class="card" style="padding:0;overflow:hidden">
+        <canvas id="mc" style="display:block;width:100%;height:auto;"></canvas>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="card">
+          <div style="font-size:11px;color:#8B949E;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Camadas</div>
+          ${[
+            {l:"Collars",c:"#3FB950",on:true},
+            {l:"Alvos",c:"#F0A500",on:true},
+            {l:"Topografia",c:"#8B949E",on:false},
+            {l:"Geofísica",c:"#58A6FF",on:false},
+            {l:"Geochem Solo",c:"#B28AE8",on:false},
+            {l:"Licenças",c:"#E3B341",on:true}
+          ].map(lay=>`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:10px;height:10px;border-radius:2px;background:${lay.on?lay.c:"#21262D"}"></div>
+              <span style="font-size:12px;color:${lay.on?"#E6EDF3":"#484F58"}">${lay.l}</span>
+            </div>
+            <div style="width:28px;height:14px;border-radius:7px;background:${lay.on?"#F0A500":"#21262D"};position:relative;cursor:pointer">
+              <div style="width:10px;height:10px;border-radius:50%;background:#fff;position:absolute;top:2px;left:${lay.on?"15px":"2px"};transition:left .2s"></div>
+            </div>
+          </div>`).join("")}
+        </div>
+        <div class="card">
+          <div style="font-size:11px;color:#8B949E;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Legenda</div>
+          ${[
+            {l:"Furo — Completo",c:"#3FB950"},
+            {l:"Furo — Em andamento",c:"#F0A500"},
+            {l:"Furo — Planejado",c:"#58A6FF"},
+            {l:"Au > 1 g/t",c:"#FFD700"},
+            {l:"Alvo prospectivo",c:"#F0A500"}
+          ].map(x=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+            <div style="width:13px;height:13px;border-radius:50%;border:2px solid ${x.c};background:${x.c}30;flex-shrink:0"></div>
+            <span style="font-size:11px;color:#8B949E">${x.l}</span>
+          </div>`).join("")}
+        </div>
+        <div class="card">
+          <div style="font-size:11px;color:#8B949E;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Exportar</div>
+          ${["Shapefile (.shp)","GeoJSON (.geojson)","CSV Coordenadas","DXF (AutoCAD)"].map(f=>`<button style="display:block;width:100%;padding:8px 10px;margin-bottom:6px;background:transparent;border:1px solid #21262D;border-radius:6px;color:#8B949E;font-size:12px;cursor:pointer;text-align:left;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='#F0A50060';this.style.color='#E6EDF3'" onmouseout="this.style.borderColor='#21262D';this.style.color='#8B949E'">${f}</button>`).join("")}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function drawMap(){
+  const c=document.getElementById("mc");
+  if(!c)return;
+  c.width=680;c.height=480;
+  const x=c.getContext("2d");
+  const W=c.width,H=c.height;
+  x.fillStyle="#0D1117";x.fillRect(0,0,W,H);
+  x.strokeStyle="#1C2330";x.lineWidth=0.5;
+  for(let i=0;i<W;i+=40){x.beginPath();x.moveTo(i,0);x.lineTo(i,H);x.stroke();}
+  for(let i=0;i<H;i+=40){x.beginPath();x.moveTo(0,i);x.lineTo(W,i);x.stroke();}
+  x.strokeStyle="#21262D80";x.lineWidth=1;
+  for(let i=0;i<5;i++){x.beginPath();x.arc(W/2+20,H/2-10,60+i*45,0,Math.PI*2);x.stroke();}
+  const holes=[
+    {px:W/2-60,py:H/2+20,name:"SRD-001",st:"Completo",au:8.72},
+    {px:W/2-10,py:H/2-10,name:"SRD-002",st:"Completo",au:2.14},
+    {px:W/2+40,py:H/2-35,name:"SRD-003",st:"Em andamento",au:null},
+    {px:W/2+90,py:H/2-60,name:"SRD-004",st:"Planejado",au:null},
+    {px:W/2+140,py:H/2-80,name:"SRD-005",st:"Completo",au:4.18}
+  ];
+  holes.forEach(h=>{
+    const col=h.st==="Completo"?"#3FB950":h.st==="Em andamento"?"#F0A500":"#58A6FF";
+    x.beginPath();x.arc(h.px,h.py,10,0,Math.PI*2);x.fillStyle=col+"25";x.fill();
+    x.beginPath();x.arc(h.px,h.py,7,0,Math.PI*2);x.strokeStyle=col;x.lineWidth=1.5;x.stroke();
+    x.beginPath();x.arc(h.px,h.py,4,0,Math.PI*2);
+    x.fillStyle=h.au&&h.au>1?"#FFD700":col;x.fill();
+    x.fillStyle="#E6EDF3";x.font="bold 10px 'IBM Plex Mono',monospace";
+    x.fillText(h.name,h.px+12,h.py+4);
+    if(h.au){x.fillStyle="#F0A500";x.font="9px 'IBM Plex Mono',monospace";x.fillText(h.au+" g/t",h.px+12,h.py+14);}
+  });
+  x.beginPath();x.setLineDash([4,4]);x.strokeStyle="#F0A50055";x.lineWidth=1;
+  x.ellipse(W/2+40,H/2-30,115,72,-0.3,0,Math.PI*2);x.stroke();x.setLineDash([]);
+  x.fillStyle="#F0A500";x.font="bold 10px 'IBM Plex Mono'";x.fillText("ALVO A",W/2+110,H/2-95);
+  x.fillStyle="#E6EDF3";x.font="bold 12px Arial";x.fillText("N",W-40,28);
+  x.beginPath();x.moveTo(W-34,34);x.lineTo(W-34,58);x.strokeStyle="#E6EDF3";x.lineWidth=1.5;x.stroke();
+  x.beginPath();x.moveTo(W-39,41);x.lineTo(W-34,34);x.lineTo(W-29,41);x.fillStyle="#E6EDF3";x.fill();
+  x.strokeStyle="#484F58";x.lineWidth=1;
+  x.beginPath();x.moveTo(40,H-28);x.lineTo(140,H-28);x.stroke();
+  x.fillStyle="#484F58";x.font="10px Arial";x.fillText("0",38,H-16);x.fillText("500m",118,H-16);
+}
+
+// ── AUDIT ──
+function rAudit(){
+  const ac={EDIT:"#E3B341",INSERT:"#3FB950",APPROVE:"#58A6FF",DELETE:"#F85149"};
+  return`
+  ${tb("Trilha de Auditoria","Histórico completo de alterações · Todos os projetos",btn("Exportar Log","g","export"))}
+  <div class="pc">
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+      ${["Todos","EDIT","INSERT","APPROVE","DELETE"].map(f=>`<button class="pill act" style="font-size:11px">${f}</button>`).join("")}
+    </div>
+    <div class="tw-wrap">
+      <table class="tw"><thead><tr>
+        <th>Timestamp</th><th>Usuário</th><th>Ação</th><th>Tabela</th>
+        <th>Registro</th><th>Detalhe</th><th>Justificativa</th>
+      </tr></thead><tbody>
+        ${AUDIT.map(l=>`<tr>
+          <td class="mono" style="color:#8B949E;white-space:nowrap">${l.ts}</td>
+          <td style="color:#E6EDF3">${l.user}</td>
+          <td><span class="badge mono" style="color:${ac[l.action]||"#8B949E"};background:${(ac[l.action]||"#8B949E")}20;border:1px solid ${(ac[l.action]||"#8B949E")}30">${l.action}</span></td>
+          <td class="mono" style="color:#58A6FF;font-size:11px">${l.table}</td>
+          <td style="color:#E6EDF3;font-size:11px">${l.record}</td>
+          <td style="color:#8B949E;max-width:260px">${l.detail}</td>
+          <td style="color:#484F58;font-style:italic">${l.reason}</td>
+        </tr>`).join("")}
+      </tbody></table>
+    </div>
+  </div>`;
+}
+
+// ── PLACEHOLDER ──
+function rPlac(label,iconD){
+  return`
+  ${tb(label,"Módulo em construção")}
+  <div style="padding:80px 28px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center">
+    <div style="width:64px;height:64px;border-radius:16px;background:#F0A50020;display:flex;align-items:center;justify-content:center">
+      ${ico(iconD,28,"#F0A500")}
+    </div>
+    <div style="font-size:18px;font-weight:700;color:#E6EDF3">${label}</div>
+    <div style="font-size:13px;color:#8B949E;max-width:400px">Este módulo está incluído no escopo completo do GeoCore Explorer e estará disponível nas próximas versões.</div>
+    ${btn("Solicitar Acesso Antecipado","p")}
+  </div>`;
+}
+
+// ── INIT ──
+nav();render();
+</script>
+</body>
+</html>
